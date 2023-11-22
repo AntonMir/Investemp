@@ -2,7 +2,20 @@ import {Module} from '@nestjs/common';
 import { TelegramModule } from '@telegram/telegram.module';
 import { ConfigModule } from '@nestjs/config';
 import {UserModule} from "@src/api/user/user.module";
-import {RouterModule} from "@nestjs/core";
+import {RouterModule, RouteTree} from "@nestjs/core";
+
+const apiPrefixList: RouteTree[] = [
+  {
+    path: 'test',
+    module: UserModule,
+    children: [
+      {
+        path: 'test2',
+        module: TelegramModule
+      }
+    ]
+  }
+]
 
 @Module({
   imports: [
@@ -19,6 +32,7 @@ import {RouterModule} from "@nestjs/core";
           path: 'tg',
           module: TelegramModule,
         },
+          ...apiPrefixList
       ],
     ),
   ],
