@@ -9,12 +9,18 @@ import {RouterModule} from "@nestjs/core";
     ConfigModule.forRoot(),
     TelegramModule,
     UserModule,
-    RouterModule.register([
-      {
-        path: 'dashboard',
-        module: UserModule,
-      },
-    ]),
+    RouterModule.register(
+      [
+        {
+          path: 'dashboard',
+          module: UserModule,
+        },
+        {
+          path: 'tg',
+          module: TelegramModule,
+        },
+      ],
+    ),
   ],
 })
 export class AppModule {}
