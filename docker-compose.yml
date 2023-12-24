@@ -1,0 +1,79 @@
+version: "3.8"
+
+networks:
+  &app-network investamp_network:
+    driver: bridge
+
+x-common-template: &common-template
+  restart: always
+  volumes:
+    - /etc/localtime:/etc/localtime:ro
+  networks:
+    - *app-network
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+services:
+
+#  &db-service db:
+#    <<: *common-template
+#    container_name: *db-service
+#    image: postgres:15.2-alpine
+#    hostname: *db-service
+#    environment:
+#      POSTGRES_DB: ${DATABASE__DATABASE}
+#      POSTGRES_USER: ${DATABASE__USERNAME}
+#      POSTGRES_PASSWORD: ${DATABASE__PASSWORD}
+#      POSTGRES_HOST_AUTH_METHOD: trust
+#    expose:
+#      - 5432
+#    ports:
+#      - "127.0.0.1:5543:5432"
+#    volumes:
+#      - ./volumes/db:/var/lib/postgresql/data
+#    healthcheck:
+#      test: pg_isready -U ${DATABASE__USERNAME} -d ${DATABASE__DATABASE}
+#      interval: 10s
+#      timeout: 10s
+#      retries: 5
+#
+#  &redis-service redis:
+#    <<: *common-template
+#    container_name: *redis-service
+#    image: redis:alpine
+#    hostname: *redis-service
+#    command: redis-server --save 60 1 --loglevel warning
+#    expose:
+#      - 6379
+#    ports:
+#      - "127.0.0.1:16379:6379"
+#    volumes:
+#      - ./volumes/redis:/data
+#    healthcheck:
+#      test: redis-cli --raw incr ping
+#      interval: 10s
+#      timeout: 10s
+#      retries: 5
+
+  &telegram-service investamp:
+    <<: *common-template
+    container_name: *telegram-service
+    build:
+      context: .
+      dockerfile: .docker/investamp/dev/Dockerfile
+    hostname: *telegram-service
+    user: "1000:1000"
+    ports:
+      - "127.0.0.1:4202:${APPLICATION_PORT}"
+    volumes:
+      - .:/app
+#    depends_on:
+#      redis:
+#        condition: service_healthy
+#      db:
+#        condition: service_healthy
+    healthcheck:
+      test: curl -f http://localhost:${APPLICATION_PORT}/healthz
+      interval: 10s
+      timeout: 10s
+      retries: 5
